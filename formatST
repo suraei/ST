@@ -1,0 +1,20 @@
+#!/bin/bash
+
+mkdir -p scans/report
+touch scans/report/report.txt
+for file in scans/*
+do
+
+	if test -f $file; then
+		echo $file
+		cat "$file" | grep -oE '[0-9]+/open' | sed -e "s/\/open//" | tee $file
+		echo "--------------------------------------- " >> scans/report/report.txt
+		filename=$(basename $file)
+		echo $filename
+		cat $file | sed -e "s/^/$filename:/" >> scans/report/report.txt
+	fi
+	
+
+done
+
+echo "--------------------------------------- " >> scans/report/report.txt
