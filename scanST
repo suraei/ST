@@ -1,0 +1,30 @@
+#!/bin/bash
+
+
+while getopts "hn:" OPTION; do
+       case "$OPTION" in
+          h) # display Help
+             echo -e "${GREEN}Usage: ./nmaptime -n <network>"
+             exit;;
+          n) # Enter the target
+             NET="$OPTARG";;
+         \?) # Invalid option
+             echo -e "[!] Error: Invalid option"
+             exit;;
+       esac
+
+    done
+
+
+# Check Target
+
+if test -z "${NET}"; then
+	echo -e "${GREEN}Specify the network with -n "
+ 	exit 1
+fi
+
+
+#Check and discard offline hosts
+mkdir -p scans
+nmap -sn -n  $NET | grep -Eo '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])' > targets.txt
+sudo interlace -tL targets.txt -threads 100 -c "nmap -sSV -T4 -PS21,22,25,53,80,135,139,443,445,993,995,1521,1531,3306,3389,5985,5986,8080,8081,8090,9001,9002,9120 -oG - --open -p- _target_ > scans/_target_"
